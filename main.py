@@ -7,10 +7,10 @@ import pandas as pd
 
 chromedrive_path = '/usr/bin/chromedriver'
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--headless")
 driver = webdriver.Chrome(chromedrive_path, options=chrome_options)
 
-ella_work_loc = 'kings+cross'
+ella_work_locs = ['waterloo+london', 'farringdon+london']
 ella_max_travel_time_mins = 35
 
 matt_work_loc = 'imperial+college+london'
@@ -25,7 +25,7 @@ max_train_distance = 3
 class HouseFinder:
     def __init__(self, max_price):
         self.max_price = max_price
-        self.rightmove_url = f"https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION^87523&maxBedrooms=1&minBedrooms=1&maxPrice={self.max_price}&radius=5.0&sortType=1&propertyTypes=&mustHave=&dontShow=houseShare%2Cretirement%2Cstudent&furnishTypes=&keywords="
+        self.rightmove_url = f"https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION^87539&maxBedrooms=1&minBedrooms=1&maxPrice={self.max_price}&radius=10.0&sortType=1&propertyTypes=&mustHave=&dontShow=houseShare%2Cretirement%2Cstudent&furnishTypes=&keywords="
 
     def find_houses_rightmove(self):
         driver.get(self.rightmove_url)
@@ -55,10 +55,17 @@ class HouseFinder:
                 break
 
         return houses
+    
+    def try_find_cookies(self):
+        try:
+            cookies_button = driver.find_element_by_css_selector("button[id='save']")
+            cookies_button.click()
+        except:
+            pass
 
     def find_houses_zoopla(self):
         driver.get(
-            f"https://www.zoopla.co.uk/to-rent/property/mayfair?beds_max=1&beds_min=1&page_size=25&price_frequency=per_month&price_max={self.max_price}&view_type=list&q=Mayfair%2C+London&radius=5&results_sort=lowest_price&search_source=refine&include_shared_accommodation=false&keywords=-studio")
+            f"https://www.zoopla.co.uk/to-rent/property/westminster?beds_max=1&beds_min=1&page_size=25&price_frequency=per_month&price_max={self.max_price}&view_type=list&q=Mayfair%2C+London&radius=10&results_sort=lowest_price&search_source=refine&include_shared_accommodation=false&keywords=-studio")
         houses = []
 
         sleep(1)
@@ -69,26 +76,25 @@ class HouseFinder:
         except:
             pass
 
-        for _ in range(20):
+        for i in range(20):
             try:
                 houses_list_container = driver.find_element_by_css_selector("main[data-testid='search-content']")
                 houses_list = houses_list_container.find_elements_by_css_selector("div[data-testid='search-result']")
+
+                for house in houses_list:
+                    url = house.find_element_by_css_selector('a[data-testid="listing-details-link"]')
+                    address = house.find_element_by_css_selector("p[data-testid='listing-description']")
+                    price = house.find_element_by_css_selector(
+                        "div[data-testid='listing-price']").find_element_by_css_selector("p")
+    
+                    new_house = House(url=url.get_attribute("href"), address=address.text,
+                                      price=price.text)
+    
+                    houses.append(new_house)
             except:
-                cookies_button = driver.find_element_by_css_selector("button[id='save']")
-                cookies_button.click()
-                houses_list_container = driver.find_element_by_css_selector("main[data-testid='search-content']")
-                houses_list = houses_list_container.find_elements_by_css_selector("div[data-testid='search-result']")
-
-            for house in houses_list:
-                url = house.find_element_by_css_selector('a[data-testid="listing-details-link"]')
-                address = house.find_element_by_css_selector("p[data-testid='listing-description']")
-                price = house.find_element_by_css_selector(
-                    "div[data-testid='listing-price']").find_element_by_css_selector("p")
-
-                new_house = House(url=url.get_attribute("href"), address=address.text,
-                                  price=price.text)
-
-                houses.append(new_house)
+                i -= 1
+                self.try_find_cookies()
+                continue
 
             try:
                 next_button = driver.find_element_by_xpath("//a[contains(@class, 'PaginationItemNext')]")
@@ -110,7 +116,9 @@ class HouseFinder:
         return houses
 
     def find_house_distance(self, house):
-        ella_distance = house.get_travel_dist(ella_work_loc)
+        ella_distance = house.get_travel_dist(ella_work_locs[0])
+        if ella_distance > ella_max_travel_time_mins:
+            ella_distance = house.get_travel_dist(ella_work_locs[1])
         if ella_distance > ella_max_travel_time_mins:
             return ella_distance, 9999999
         matt_distance = house.get_travel_dist(matt_work_loc, ella_dist=False)
@@ -166,6 +174,7 @@ class HouseFinder:
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    print("doing")
     house_finder = HouseFinder(max_price=1250)
     house_finder.find_suitable_houses()
 

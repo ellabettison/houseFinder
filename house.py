@@ -4,10 +4,10 @@ from time import sleep
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 
-chromdrive_path = '/usr/bin/chromedriver'
+chromedrive_path = '/usr/bin/chromedriver'
 chrome_options = Options()
 # chrome_options.add_argument("--headless")
-driver = webdriver.Chrome(chromdrive_path, options=chrome_options)
+driver = webdriver.Chrome(chromedrive_path, options=chrome_options)
 
 supermarkets_to_check = ['Tesco', 'Sainsbury', 'Morrisons', 'ASDA', 'ALDI', 'M&S', 'Waitrose', 'Co-op', 'Iceland',
                          'Lidl']
@@ -25,6 +25,8 @@ class House:
         self.closest_shop = None
         self.closest_shop_dist = None
         self.crime_rate = None
+        self.closest_gym = None
+        self.closest_gym_dist = None
 
     def __repr__(self):
         return f"address: {self.address}, \t price: {self.price}, \t Ella time: {self.ella_time}, \t Matt time: {self.matt_time}, \t url: {self.url}"
@@ -40,7 +42,7 @@ class House:
         except:
             pass
 
-        sleep(1)
+        sleep(2)
 
         try:
             public_transport_div = driver.find_element_by_css_selector("div[data-travel_mode='3']")
@@ -69,7 +71,7 @@ class House:
             time_input.send_keys(Keys.DELETE)
             time_input.send_keys("16:00")
 
-            sleep(2)
+            sleep(3)
 
         except:
             return 2222222
@@ -169,16 +171,26 @@ class House:
         selector = selector[:-3]
         selector += "]"
 
-        closest_supermarket = supermarkets_table.find_elements_by_xpath(selector)[0].find_element_by_xpath('..')
-        closest_supermarket_cols = closest_supermarket.find_elements_by_css_selector("td")
-        self.closest_shop = closest_supermarket_cols[0].text
-        self.closest_shop_dist = float(closest_supermarket_cols[1].text[:-2])
+        try:
+            closest_supermarket = supermarkets_table.find_elements_by_xpath(selector)[0].find_element_by_xpath('..')
+            closest_supermarket_cols = closest_supermarket.find_elements_by_css_selector("td")
+            self.closest_shop = closest_supermarket_cols[0].text
+            self.closest_shop_dist = float(closest_supermarket_cols[1].text[:-2])
+        except:
+            self.closest_shop = "None"
+            self.closest_shop_dist = 5
 
         print(self.closest_station, self.closest_station_dist)
         print(self.closest_shop, self.closest_shop_dist)
 
         print("\n ============= \n")
-
+        
+        # closeness to gyms
+        
+        driver.get(f"https://www.getthedata.com/postcode/{postcode}")
+        gyms_table = driver.find_element_by_xpath("//table[contains(text(),'Nearest sports facilities to')]/following-sibling::table")
+        print(gyms_table.text)
+    
 
 if __name__ == '__main__':
     house = House('www.google.com', 'al35rz', 100)
