@@ -48,7 +48,7 @@ if __name__ == "__main__":
 		$$/       $$/ $$/   $$/  $$$$$$$/  $$$$$$$/ $$/       $$/ $$/ $$/ $$/ 
 		"""
 
-	,"pink"))
+	,"magenta"))
 	
 	print(colored("""
 	If you haven't already, install geckodriver from here: https://github.com/mozilla/geckodriver/releases
