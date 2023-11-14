@@ -68,10 +68,10 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='FIND SOME HOUSES!!!')
 	parser.add_argument('-f', '--furnished', help="House can be unfurnished", action='store_false', default=True)
 	parser.add_argument('-p', '--max_price', type=int, help="Max monthly rent price", required=True)
-	parser.add_argument('-l', '--locations', type=str,
+	parser.add_argument('-l', '--locations', type=str, nargs='+',
 						help="Locations you want to be close to, anything that can be easily identified by Google Maps, e.g. postcode or street address, in the format: \"loc1\" \"loc2\"",
 						required=True)
-	parser.add_argument('-t', '--max_travel_times', type=int,
+	parser.add_argument('-t', '--max_travel_times', type=int, nargs='+',
 						help="Max travel times for each of the locations you want to be close to in minutes, separated by spaces",
 						required=True)
 	parser.add_argument('-b', '--min_bedrooms', type=int, help="Minimum number of bedrooms required for house",
