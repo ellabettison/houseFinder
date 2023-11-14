@@ -67,7 +67,7 @@ class HouseFinder:
         furnished_str = "furnishTypes="
         if furnished:
             furnished_str = "furnishTypes=furnished%2CpartFurnished"
-        self.rightmove_url = f"https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION^87539&minBedrooms={self.min_bedrooms}&maxPrice={self.max_price}&radius={search_radius}&sortType=1&propertyTypes=&mustHave=&dontShow=houseShare%2Cretirement%2Cstudent&{furnished_str}&keywords="
+        self.rightmove_url = f"https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=POSTCODE^15515&minBedrooms={self.min_bedrooms}&maxPrice={self.max_price}&radius={search_radius}&sortType=1&propertyTypes=&mustHave=&dontShow=houseShare%2Cretirement%2Cstudent&{furnished_str}&keywords="
 
     def find_houses_rightmove(self):
         driver.get(self.rightmove_url)
@@ -99,13 +99,13 @@ class HouseFinder:
                 else:
                     break
             except Exception as e:
-                print(e)
                 try:
                     sleep(1)
                     cookies_button = driver.find_element(by=By.ID, value="onetrust-reject-all-handler")
                     cookies_button.click()
                 except Exception as e:
-                    print(e)
+                    # print(e)
+                    pass
                 pass
 
         return houses
@@ -142,7 +142,7 @@ class HouseFinder:
                 mydriver.switch_to.default_content()
             except Exception as e:
                 mydriver.switch_to.default_content()
-                print(e)
+                # print(e)
 
             # print([fr for fr in iframe])
             # # 
@@ -226,7 +226,7 @@ class HouseFinder:
             #     print("next button disabled")
             #     return houses
             except Exception as e:
-                print(e)
+                # print(e)
                 print("cant find next button")
                 i += 1
                 #     # try:
